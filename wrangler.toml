@@ -3,20 +3,20 @@ compatibility_date = "2025-12-02"
 compatibility_flags = ["nodejs_compat"]
 main = "dist/_worker.js"
 
-# D1 Database - Update with your database ID
+# D1 Database
 [[d1_databases]]
 binding = "DB"
-database_name = "ops-cloud-db"
-database_id = "TO_BE_CREATED"
+database_name = "opscloud_admindb"
+database_id = "aa2eb914-8299-4adf-8e2a-c64d364caa8f"
 
-# KV Namespace - Update with your KV namespace ID
+# KV Namespace
 [[kv_namespaces]]
 binding = "SESSION"
-id = "TO_BE_CREATED"
+id = "9e5ce6f579a64566a2cfa75147e65559"
 
 # Environment Variables
 [vars]
-JWT_SECRET = "REPLACE_WITH_SECURE_SECRET_IN_PRODUCTION"
+JWT_SECRET = "9a23dcbdde512a18b2df3699661b3893c180dfa2a57bffee996c7b9f7e27acc5"
 ALLOWED_EMAIL_DOMAIN = "mybobs.com"
 
 # Observability

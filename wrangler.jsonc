@@ -1,6 +1,7 @@
 {
   "name": "ops-cloud",
   "compatibility_date": "2025-12-02",
+  "compatibility_flags": ["nodejs_compat"],
   "main": "dist/_worker.js",
   "observability": {
     "enabled": false,

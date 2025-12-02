@@ -11,6 +11,8 @@ const sortedTools = allTools.sort((a, b) => {
 });
 
 const categories = ['ai', 'automation', 'data', 'productivity', 'development'];
+const auth = Astro.locals.auth;
+const canExecute = auth?.hasRole(['admin', 'super_user']) || false;
 ---
 
 <BaseLayout title="AI Tools Directory - Discover Powerful Tools">
@@ -51,6 +53,7 @@ const categories = ['ai', 'automation', 'data', 'productivity', 'development'];
           tags={tool.data.tags}
           status={tool.data.status}
           featured={tool.data.featured}
+          canExecute={canExecute}
         />
       ))}
     </section>

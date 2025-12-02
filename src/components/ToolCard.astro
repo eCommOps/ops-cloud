@@ -7,9 +7,10 @@ interface Props {
   tags: string[];
   status: 'active' | 'beta' | 'coming-soon';
   featured?: boolean;
+  canExecute?: boolean;
 }
 
-const { slug, title, description, category, tags, status, featured = false } = Astro.props;
+const { slug, title, description, category, tags, status, featured = false, canExecute = false } = Astro.props;
 
 const statusColors = {
   active: '#10b981',
@@ -45,9 +46,16 @@ const categoryEmojis = {
         <span class="tag">{tag}</span>
       ))}
     </div>
-    <a href={`/tools/${slug}`} class="tool-link">
-      Learn More →
-    </a>
+    <div class="tool-actions">
+      {canExecute && status === 'active' && (
+        <a href={`/tools/${slug}/execute`} class="execute-btn">
+          <span>⚡</span> Execute
+        </a>
+      )}
+      <a href={`/tools/${slug}`} class="tool-link">
+        Learn More →
+      </a>
+    </div>
   </div>
 </article>
 
@@ -143,6 +151,45 @@ const categoryEmojis = {
     border-radius: 0.5rem;
     font-size: 0.75rem;
     border: 1px solid var(--color-border);
+  }
+
+  .tool-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+  }
+
+  .execute-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: var(--radius);
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  }
+
+  .execute-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
+  }
+
+  .execute-btn span {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
   }
 
   .tool-link {

@@ -9,6 +9,23 @@
       "zone_name": "opscloud.us"
     }
   ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ops-cloud-db",
+      "database_id": "your-database-id-here"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "your-kv-namespace-id-here"
+    }
+  ],
+  "vars": {
+    "JWT_SECRET": "change-this-to-a-secure-random-string",
+    "ALLOWED_EMAIL_DOMAIN": "mybobs.com"
+  },
   "observability": {
     "enabled": false,
     "head_sampling_rate": 1,

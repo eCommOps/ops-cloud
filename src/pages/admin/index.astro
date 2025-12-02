@@ -1,0 +1,559 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const auth = Astro.locals.auth;
+
+// Require admin or super_user
+if (!auth?.hasRole(['admin', 'super_user'])) {
+  return Astro.redirect('/');
+}
+
+const user = auth.user;
+const isSuperUser = user?.role === 'super_user';
+---
+
+<BaseLayout title="Admin Dashboard - AI Tools Directory">
+  <div class="container">
+    <div class="admin-header">
+      <h1>Admin Dashboard</h1>
+      <p class="subtitle">Manage users and platform settings</p>
+    </div>
+
+    <div class="admin-grid">
+      <!-- User Management Card -->
+      <div class="admin-card">
+        <div class="card-header">
+          <h2>👥 User Management</h2>
+          <span class="badge" id="user-count">Loading...</span>
+        </div>
+        <div class="card-body">
+          <div id="users-list" class="users-list">
+            <div class="loading">Loading users...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Card -->
+      <div class="admin-card">
+        <div class="card-header">
+          <h2>📊 Platform Stats</h2>
+        </div>
+        <div class="card-body stats-grid">
+          <div class="stat-item">
+            <div class="stat-value" id="total-users">-</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="admin-count">-</div>
+            <div class="stat-label">Admins</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="viewer-count">-</div>
+            <div class="stat-label">Viewers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Change Modal -->
+    <div id="role-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Change User Role</h3>
+          <button class="close-btn" id="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Change role for <strong id="modal-user-email"></strong></p>
+          <div class="role-options">
+            <label class="role-option">
+              <input type="radio" name="role" value="viewer" />
+              <span>Viewer</span>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="role" value="admin" />
+              <span>Admin</span>
+            </label>
+            {isSuperUser && (
+              <label class="role-option">
+                <input type="radio" name="role" value="super_user" />
+                <span>Super User</span>
+              </label>
+            )}
+          </div>
+          <div id="modal-error" class="error-message" style="display: none;"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="cancel-btn">Cancel</button>
+          <button class="btn-primary" id="save-role-btn">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .admin-header {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .admin-header h1 {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .subtitle {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+  }
+
+  .admin-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+  }
+
+  .admin-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: slideUp 0.4s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .card-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-header h2 {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+
+  .badge {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .card-body {
+    padding: var(--spacing-lg);
+  }
+
+  .users-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .user-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    transition: all 0.2s;
+  }
+
+  .user-item:hover {
+    border-color: var(--color-primary);
+    transform: translateX(4px);
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .user-email {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .user-meta {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .user-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .role-badge-viewer {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .role-badge-admin {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .role-badge-super_user {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .change-role-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .change-role-btn:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-lg);
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius);
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stat-label {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .loading {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-secondary);
+  }
+
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-content {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    max-width: 500px;
+    width: 100%;
+    margin: var(--spacing-md);
+    animation: modalSlide 0.3s ease-out;
+  }
+
+  @keyframes modalSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .close-btn:hover {
+    color: var(--color-text);
+  }
+
+  .modal-body {
+    padding: var(--spacing-lg);
+  }
+
+  .role-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+  }
+
+  .role-option {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .role-option:hover {
+    border-color: var(--color-primary);
+  }
+
+  .role-option input:checked + span {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .modal-footer {
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-bg-secondary);
+  }
+
+  .btn-primary {
+    padding: 0.75rem 1.5rem;
+    background: var(--color-primary);
+    border: none;
+    border-radius: var(--radius);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-dark);
+  }
+
+  .error-message {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius);
+    color: #fca5a5;
+    font-size: 0.875rem;
+  }
+</style>
+
+<script>
+  let currentUserId = '';
+  let currentUserEmail = '';
+  const isSuperUser = document.querySelector('.role-option input[value="super_user"]') !== null;
+
+  async function loadUsers() {
+    try {
+      const response = await fetch('/api/admin/users');
+      const data = await response.json();
+
+      if (response.ok && data.users) {
+        displayUsers(data.users);
+        updateStats(data.users);
+      }
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    }
+  }
+
+  function displayUsers(users: any[]) {
+    const usersList = document.getElementById('users-list');
+    const userCount = document.getElementById('user-count');
+
+    if (!usersList || !userCount) return;
+
+    userCount.textContent = `${users.length} users`;
+
+    if (users.length === 0) {
+      usersList.innerHTML = '<div class="loading">No users found</div>';
+      return;
+    }
+
+    usersList.innerHTML = users
+      .map(
+        (user) => `
+        <div class="user-item">
+          <div class="user-info">
+            <div class="user-email">${user.email}</div>
+            <div class="user-meta">
+              Joined ${new Date(user.created_at).toLocaleDateString()}
+              ${user.last_login ? ` • Last login ${new Date(user.last_login).toLocaleDateString()}` : ''}
+            </div>
+          </div>
+          <div class="user-actions">
+            <span class="role-badge-${user.role}">
+              ${user.role === 'super_user' ? 'Super User' : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+            </span>
+            ${isSuperUser ? `<button class="change-role-btn" data-user-id="${user.id}" data-user-email="${user.email}" data-current-role="${user.role}">
+              Change Role
+            </button>` : ''}
+          </div>
+        </div>
+      `
+      )
+      .join('');
+
+    // Add click handlers
+    document.querySelectorAll('.change-role-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        currentUserId = target.dataset.userId || '';
+        currentUserEmail = target.dataset.userEmail || '';
+        const currentRole = target.dataset.currentRole || '';
+        openRoleModal(currentUserEmail, currentRole);
+      });
+    });
+  }
+
+  function updateStats(users: any[]) {
+    const totalUsers = document.getElementById('total-users');
+    const adminCount = document.getElementById('admin-count');
+    const viewerCount = document.getElementById('viewer-count');
+
+    if (totalUsers) totalUsers.textContent = users.length.toString();
+    if (adminCount) adminCount.textContent = users.filter((u) => u.role === 'admin' || u.role === 'super_user').length.toString();
+    if (viewerCount) viewerCount.textContent = users.filter((u) => u.role === 'viewer').length.toString();
+  }
+
+  function openRoleModal(email: string, currentRole: string) {
+    const modal = document.getElementById('role-modal');
+    const modalEmail = document.getElementById('modal-user-email');
+    const roleInputs = document.querySelectorAll('input[name="role"]');
+
+    if (modal) modal.style.display = 'flex';
+    if (modalEmail) modalEmail.textContent = email;
+
+    roleInputs.forEach((input) => {
+      const radioInput = input as HTMLInputElement;
+      radioInput.checked = radioInput.value === currentRole;
+    });
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('role-modal');
+    if (modal) modal.style.display = 'none';
+    currentUserId = '';
+    currentUserEmail = '';
+  }
+
+  async function saveRole() {
+    const selectedRole = document.querySelector('input[name="role"]:checked') as HTMLInputElement;
+    const errorDiv = document.getElementById('modal-error');
+
+    if (!selectedRole) {
+      if (errorDiv) {
+        errorDiv.textContent = 'Please select a role';
+        errorDiv.style.display = 'block';
+      }
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/users/${currentUserId}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: selectedRole.value }),
+      });
+
+      if (response.ok) {
+        closeModal();
+        loadUsers(); // Reload users
+      } else {
+        const data = await response.json();
+        if (errorDiv) {
+          errorDiv.textContent = data.error || 'Failed to update role';
+          errorDiv.style.display = 'block';
+        }
+      }
+    } catch (error) {
+      if (errorDiv) {
+        errorDiv.textContent = 'Network error';
+        errorDiv.style.display = 'block';
+      }
+    }
+  }
+
+  // Event listeners
+  document.getElementById('close-modal')?.addEventListener('click', closeModal);
+  document.getElementById('cancel-btn')?.addEventListener('click', closeModal);
+  document.getElementById('save-role-btn')?.addEventListener('click', saveRole);
+
+  // Load users on page load
+  loadUsers();
+</script>

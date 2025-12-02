@@ -1,0 +1,88 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  toolName: string;
+  toolIcon: string;
+}
+
+const { title, toolName, toolIcon } = Astro.props;
+---
+
+<BaseLayout title={title}>
+  <div class="container">
+    <div class="execute-container">
+      <div class="execute-header">
+        <div class="tool-icon-large">{toolIcon}</div>
+        <div>
+          <h1>{toolName}</h1>
+          <a href="/" class="back-link">← Back to Directory</a>
+        </div>
+      </div>
+
+      <div class="execute-content">
+        <slot />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .execute-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .execute-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    animation: slideDown 0.5s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .tool-icon-large {
+    font-size: 4rem;
+    line-height: 1;
+  }
+
+  .execute-header h1 {
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .back-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: var(--color-primary);
+  }
+
+  .execute-content {
+    animation: fadeIn 0.6s ease-out 0.2s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>

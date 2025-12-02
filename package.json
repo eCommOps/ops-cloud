@@ -1,1 +1,1 @@
-{"name":"ops-cloud","type":"module","version":"0.0.1","scripts":{"dev":"astro dev","build":"astro build","preview":"astro preview"},"dependencies":{"astro":"^5.16.3"}}
+{"name":"ops-cloud","type":"module","version":"0.0.1","scripts":{"dev":"astro dev","build":"astro build","preview":"astro preview"},"dependencies":{"@astrojs/cloudflare":"^12.6.12","astro":"^5.16.3"}}

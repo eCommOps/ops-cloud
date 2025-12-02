@@ -1,5 +1,7 @@
 import { defineConfig } from "astro/config";
+import cloudflare from "@astrojs/cloudflare";
 
 export default defineConfig({
-  // Astro config options here if needed
+  output: "server",
+  adapter: cloudflare()
 });

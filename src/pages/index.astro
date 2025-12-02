@@ -1,233 +1,340 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ToolCard from '../components/ToolCard.astro';
 
-const allTools = await getCollection('tools');
-const sortedTools = allTools.sort((a, b) => {
-  if (a.data.featured && !b.data.featured) return -1;
-  if (!a.data.featured && b.data.featured) return 1;
-  return 0;
-});
-
-const categories = ['ai', 'automation', 'data', 'productivity', 'development'];
 const auth = Astro.locals.auth;
-const canExecute = auth?.hasRole(['admin', 'super_user']) || false;
+const user = auth?.user;
 ---
 
-<BaseLayout title="AI Tools Directory - Discover Powerful Tools">
+<BaseLayout title="OpsCloud - Enterprise AI Tools Platform">
   <div class="container">
+    <!-- Hero Section -->
     <section class="hero">
-      <h1>Discover Powerful AI Tools</h1>
-      <p class="hero-description">
-        Your curated directory of cutting-edge AI tools and automation solutions.
-        Find the perfect tool for your next project.
-      </p>
-
-      <div class="search-container">
-        <input
-          type="search"
-          id="search-input"
-          placeholder="Search tools..."
-          class="search-input"
-        />
-      </div>
-
-      <div class="filter-container">
-        <button class="filter-btn active" data-category="all">All Tools</button>
-        {categories.map(category => (
-          <button class="filter-btn" data-category={category}>
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </button>
-        ))}
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="gradient-text">Enterprise AI Tools</span><br/>
+          Built for Teams
+        </h1>
+        <p class="hero-subtitle">
+          Secure, scalable, and powerful AI solutions for modern enterprises.
+          Streamline workflows, automate tasks, and unlock productivity.
+        </p>
+        {!user && (
+          <div class="hero-cta">
+            <a href="/register" class="btn-primary">Get Started</a>
+            <a href="/login" class="btn-secondary">Sign In</a>
+          </div>
+        )}
       </div>
     </section>
 
-    <section class="tools-grid" id="tools-grid">
-      {sortedTools.map((tool) => (
-        <ToolCard
-          slug={tool.slug}
-          title={tool.data.title}
-          description={tool.data.description}
-          category={tool.data.category}
-          tags={tool.data.tags}
-          status={tool.data.status}
-          featured={tool.data.featured}
-          canExecute={canExecute}
-        />
-      ))}
+    <!-- Features Grid -->
+    <section class="features">
+      <div class="features-grid">
+        <div class="feature-card gradient-card-1">
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <div class="card-icon">🔐</div>
+            <h3>Enterprise Security</h3>
+            <p>Role-based access control with @mybobs.com email validation and bcrypt encryption</p>
+          </div>
+        </div>
+
+        <div class="feature-card gradient-card-2">
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <div class="card-icon">⚡</div>
+            <h3>Lightning Fast</h3>
+            <p>Built on Cloudflare Workers edge network with D1 database and KV storage</p>
+          </div>
+        </div>
+
+        <div class="feature-card gradient-card-3">
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <div class="card-icon">🎯</div>
+            <h3>Role Management</h3>
+            <p>Three-tier access system: Viewers, Admins, and Super Users with granular permissions</p>
+          </div>
+        </div>
+
+        <div class="feature-card gradient-card-4">
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <div class="card-icon">📊</div>
+            <h3>Audit Logging</h3>
+            <p>Complete activity tracking and compliance monitoring for all user actions</p>
+          </div>
+        </div>
+
+        <div class="feature-card gradient-card-5">
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <div class="card-icon">🚀</div>
+            <h3>Tool Execution</h3>
+            <p>Admin-only tool execution with comprehensive logging and permission control</p>
+          </div>
+        </div>
+
+        <div class="feature-card gradient-card-6">
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <div class="card-icon">🎨</div>
+            <h3>Modern UI</h3>
+            <p>Clean, Apple-inspired design with smooth animations and responsive layouts</p>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <div id="no-results" class="no-results" style="display: none;">
-      <p>No tools found matching your search.</p>
-    </div>
+    <!-- Stats Section -->
+    {user && (
+      <section class="stats">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">Uptime</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">&lt;50ms</div>
+            <div class="stat-label">Response Time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">Enterprise</div>
+            <div class="stat-label">Grade Security</div>
+          </div>
+        </div>
+      </section>
+    )}
   </div>
 </BaseLayout>
 
 <style>
   .hero {
     text-align: center;
-    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-2xl) 0 var(--spacing-xl);
+    position: relative;
   }
 
-  .hero h1 {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--gradient-blue) 0%, var(--gradient-purple) 50%, var(--gradient-pink) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: gradient-shift 8s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .hero-subtitle {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-xl);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--gradient-blue), var(--gradient-purple));
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(10, 132, 255, 0.4);
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: var(--color-text);
+    text-decoration: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-bg-card);
+    border-color: var(--gradient-blue);
+  }
+
+  .features {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-lg);
+  }
+
+  .feature-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .card-gradient {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+
+  .feature-card:hover .card-gradient {
+    opacity: 0.12;
+  }
+
+  .gradient-card-1 .card-gradient {
+    background: linear-gradient(135deg, var(--gradient-blue), var(--gradient-purple));
+  }
+
+  .gradient-card-2 .card-gradient {
+    background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-pink));
+  }
+
+  .gradient-card-3 .card-gradient {
+    background: linear-gradient(135deg, var(--gradient-pink), var(--gradient-orange));
+  }
+
+  .gradient-card-4 .card-gradient {
+    background: linear-gradient(135deg, var(--gradient-orange), var(--gradient-blue));
+  }
+
+  .gradient-card-5 .card-gradient {
+    background: linear-gradient(135deg, var(--gradient-blue), var(--gradient-pink));
+  }
+
+  .gradient-card-6 .card-gradient {
+    background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-orange));
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-icon {
+    font-size: 2.5rem;
     margin-bottom: var(--spacing-md);
   }
 
-  .hero-description {
+  .feature-card h3 {
     font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    letter-spacing: -0.02em;
+  }
+
+  .feature-card p {
     color: var(--color-text-secondary);
-    max-width: 700px;
-    margin: 0 auto var(--spacing-xl) auto;
+    font-size: 0.9375rem;
+    line-height: 1.6;
   }
 
-  .search-container {
-    max-width: 600px;
-    margin: 0 auto var(--spacing-lg) auto;
+  .stats {
+    padding: var(--spacing-2xl) 0;
   }
 
-  .search-input {
-    width: 100%;
-    padding: var(--spacing-md);
-    background: var(--color-bg-secondary);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius);
-    color: var(--color-text);
-    font-size: 1rem;
-    transition: border-color 0.2s;
-  }
-
-  .search-input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-  }
-
-  .search-input::placeholder {
-    color: var(--color-text-secondary);
-  }
-
-  .filter-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    justify-content: center;
-    margin-bottom: var(--spacing-xl);
-  }
-
-  .filter-btn {
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    color: var(--color-text);
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .filter-btn:hover {
-    background: var(--color-bg-card);
-    border-color: var(--color-primary);
-  }
-
-  .filter-btn.active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: white;
-  }
-
-  .tools-grid {
+  .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
   }
 
-  .no-results {
+  .stat-card {
     text-align: center;
     padding: var(--spacing-xl);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gradient-blue), var(--gradient-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
     color: var(--color-text-secondary);
-    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   @media (max-width: 768px) {
-    .tools-grid {
+    .hero-title {
+      font-size: 2rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+
+    .hero-cta {
+      flex-direction: column;
+    }
+
+    .features-grid {
       grid-template-columns: 1fr;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      text-align: center;
     }
   }
 </style>
-
-<script>
-  // Client-side search and filter functionality
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const toolsGrid = document.getElementById('tools-grid') as HTMLElement;
-  const noResults = document.getElementById('no-results') as HTMLElement;
-  const filterBtns = document.querySelectorAll('.filter-btn');
-
-  let currentCategory = 'all';
-
-  function filterTools() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const toolCards = toolsGrid.querySelectorAll('.tool-card');
-    let visibleCount = 0;
-
-    toolCards.forEach((card) => {
-      const title = card.querySelector('.tool-title')?.textContent?.toLowerCase() || '';
-      const description = card.querySelector('.tool-description')?.textContent?.toLowerCase() || '';
-      const tags = Array.from(card.querySelectorAll('.tag'))
-        .map(tag => tag.textContent?.toLowerCase() || '')
-        .join(' ');
-
-      const matchesSearch = title.includes(searchTerm) ||
-                           description.includes(searchTerm) ||
-                           tags.includes(searchTerm);
-
-      const categoryMatch = currentCategory === 'all' ||
-                           card.getAttribute('data-category') === currentCategory;
-
-      if (matchesSearch && categoryMatch) {
-        (card as HTMLElement).style.display = 'flex';
-        visibleCount++;
-      } else {
-        (card as HTMLElement).style.display = 'none';
-      }
-    });
-
-    noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-  }
-
-  searchInput.addEventListener('input', filterTools);
-
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentCategory = btn.getAttribute('data-category') || 'all';
-      filterTools();
-    });
-  });
-
-  // Add category data attribute to cards
-  document.addEventListener('DOMContentLoaded', () => {
-    const cards = document.querySelectorAll('.tool-card');
-    cards.forEach(card => {
-      const icon = card.querySelector('.tool-icon')?.textContent;
-      const categoryMap = {
-        '🤖': 'ai',
-        '⚡': 'automation',
-        '📊': 'data',
-        '✨': 'productivity',
-        '💻': 'development'
-      };
-      const category = categoryMap[icon as keyof typeof categoryMap];
-      if (category) {
-        card.setAttribute('data-category', category);
-      }
-    });
-  });
-</script>

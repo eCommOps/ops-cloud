@@ -1,12 +1,230 @@
 ---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+
+const allTools = await getCollection('tools');
+const sortedTools = allTools.sort((a, b) => {
+  if (a.data.featured && !b.data.featured) return -1;
+  if (!a.data.featured && b.data.featured) return 1;
+  return 0;
+});
+
+const categories = ['ai', 'automation', 'data', 'productivity', 'development'];
 ---
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Welcome to Astro!</title>
-  </head>
-  <body>
-    <h1>Welcome to Astro 🚀</h1>
-    <p>This is your new Astro project in the root of your repo.</p>
-  </body>
-</html>
+
+<BaseLayout title="AI Tools Directory - Discover Powerful Tools">
+  <div class="container">
+    <section class="hero">
+      <h1>Discover Powerful AI Tools</h1>
+      <p class="hero-description">
+        Your curated directory of cutting-edge AI tools and automation solutions.
+        Find the perfect tool for your next project.
+      </p>
+
+      <div class="search-container">
+        <input
+          type="search"
+          id="search-input"
+          placeholder="Search tools..."
+          class="search-input"
+        />
+      </div>
+
+      <div class="filter-container">
+        <button class="filter-btn active" data-category="all">All Tools</button>
+        {categories.map(category => (
+          <button class="filter-btn" data-category={category}>
+            {category.charAt(0).toUpperCase() + category.slice(1)}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="tools-grid" id="tools-grid">
+      {sortedTools.map((tool) => (
+        <ToolCard
+          slug={tool.slug}
+          title={tool.data.title}
+          description={tool.data.description}
+          category={tool.data.category}
+          tags={tool.data.tags}
+          status={tool.data.status}
+          featured={tool.data.featured}
+        />
+      ))}
+    </section>
+
+    <div id="no-results" class="no-results" style="display: none;">
+      <p>No tools found matching your search.</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .hero {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .hero h1 {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .hero-description {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+    max-width: 700px;
+    margin: 0 auto var(--spacing-xl) auto;
+  }
+
+  .search-container {
+    max-width: 600px;
+    margin: 0 auto var(--spacing-lg) auto;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  .search-input::placeholder {
+    color: var(--color-text-secondary);
+  }
+
+  .filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .filter-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover {
+    background: var(--color-bg-card);
+    border-color: var(--color-primary);
+  }
+
+  .filter-btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .no-results {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-secondary);
+    font-size: 1.25rem;
+  }
+
+  @media (max-width: 768px) {
+    .tools-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Client-side search and filter functionality
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const toolsGrid = document.getElementById('tools-grid') as HTMLElement;
+  const noResults = document.getElementById('no-results') as HTMLElement;
+  const filterBtns = document.querySelectorAll('.filter-btn');
+
+  let currentCategory = 'all';
+
+  function filterTools() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const toolCards = toolsGrid.querySelectorAll('.tool-card');
+    let visibleCount = 0;
+
+    toolCards.forEach((card) => {
+      const title = card.querySelector('.tool-title')?.textContent?.toLowerCase() || '';
+      const description = card.querySelector('.tool-description')?.textContent?.toLowerCase() || '';
+      const tags = Array.from(card.querySelectorAll('.tag'))
+        .map(tag => tag.textContent?.toLowerCase() || '')
+        .join(' ');
+
+      const matchesSearch = title.includes(searchTerm) ||
+                           description.includes(searchTerm) ||
+                           tags.includes(searchTerm);
+
+      const categoryMatch = currentCategory === 'all' ||
+                           card.getAttribute('data-category') === currentCategory;
+
+      if (matchesSearch && categoryMatch) {
+        (card as HTMLElement).style.display = 'flex';
+        visibleCount++;
+      } else {
+        (card as HTMLElement).style.display = 'none';
+      }
+    });
+
+    noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  searchInput.addEventListener('input', filterTools);
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = btn.getAttribute('data-category') || 'all';
+      filterTools();
+    });
+  });
+
+  // Add category data attribute to cards
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.tool-card');
+    cards.forEach(card => {
+      const icon = card.querySelector('.tool-icon')?.textContent;
+      const categoryMap = {
+        '🤖': 'ai',
+        '⚡': 'automation',
+        '📊': 'data',
+        '✨': 'productivity',
+        '💻': 'development'
+      };
+      const category = categoryMap[icon as keyof typeof categoryMap];
+      if (category) {
+        card.setAttribute('data-category', category);
+      }
+    });
+  });
+</script>

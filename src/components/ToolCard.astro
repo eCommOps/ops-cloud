@@ -1,0 +1,163 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  status: 'active' | 'beta' | 'coming-soon';
+  featured?: boolean;
+}
+
+const { slug, title, description, category, tags, status, featured = false } = Astro.props;
+
+const statusColors = {
+  active: '#10b981',
+  beta: '#f59e0b',
+  'coming-soon': '#6b7280'
+};
+
+const categoryEmojis = {
+  ai: '🤖',
+  automation: '⚡',
+  data: '📊',
+  productivity: '✨',
+  development: '💻'
+};
+---
+
+<article class="tool-card" class:list={[{ featured }]}>
+  {featured && <div class="featured-badge">Featured</div>}
+
+  <div class="tool-header">
+    <div class="tool-icon">{categoryEmojis[category]}</div>
+    <span class="tool-status" style={`background: ${statusColors[status]}`}>
+      {status === 'coming-soon' ? 'Coming Soon' : status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  </div>
+
+  <h3 class="tool-title">{title}</h3>
+  <p class="tool-description">{description}</p>
+
+  <div class="tool-footer">
+    <div class="tool-tags">
+      {tags.slice(0, 3).map(tag => (
+        <span class="tag">{tag}</span>
+      ))}
+    </div>
+    <a href={`/tools/${slug}`} class="tool-link">
+      Learn More →
+    </a>
+  </div>
+</article>
+
+<style>
+  .tool-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--spacing-lg);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary);
+  }
+
+  .tool-card.featured {
+    border: 2px solid var(--color-primary);
+    background: linear-gradient(135deg, var(--color-bg-card) 0%, #1e293b 100%);
+  }
+
+  .featured-badge {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background: var(--color-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .tool-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .tool-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  .tool-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    text-transform: capitalize;
+  }
+
+  .tool-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text);
+  }
+
+  .tool-description {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+    flex: 1;
+  }
+
+  .tool-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .tool-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .tag {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    border: 1px solid var(--color-border);
+  }
+
+  .tool-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: gap 0.2s;
+    align-self: flex-start;
+  }
+
+  .tool-link:hover {
+    gap: 0.5rem;
+    color: var(--color-primary-dark);
+  }
+</style>

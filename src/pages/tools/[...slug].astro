@@ -1,0 +1,240 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const tools = await getCollection('tools');
+  return tools.map((tool) => ({
+    params: { slug: tool.slug },
+    props: { tool },
+  }));
+}
+
+const { tool } = Astro.props;
+const { Content } = await tool.render();
+
+const categoryEmojis = {
+  ai: '🤖',
+  automation: '⚡',
+  data: '📊',
+  productivity: '✨',
+  development: '💻'
+};
+
+const statusColors = {
+  active: '#10b981',
+  beta: '#f59e0b',
+  'coming-soon': '#6b7280'
+};
+---
+
+<BaseLayout title={`${tool.data.title} - AI Tools Directory`} description={tool.data.description}>
+  <div class="container">
+    <a href="/" class="back-link">← Back to Directory</a>
+
+    <article class="tool-page">
+      <header class="tool-header">
+        <div class="tool-meta">
+          <span class="tool-icon">{categoryEmojis[tool.data.category]}</span>
+          <div>
+            <h1>{tool.data.title}</h1>
+            <div class="tool-badges">
+              <span class="category-badge">{tool.data.category}</span>
+              <span class="status-badge" style={`background: ${statusColors[tool.data.status]}`}>
+                {tool.data.status === 'coming-soon' ? 'Coming Soon' : tool.data.status.charAt(0).toUpperCase() + tool.data.status.slice(1)}
+              </span>
+              {tool.data.featured && <span class="featured-badge">Featured</span>}
+            </div>
+          </div>
+        </div>
+
+        <p class="tool-description">{tool.data.description}</p>
+
+        <div class="tool-tags">
+          {tool.data.tags.map((tag) => (
+            <span class="tag">{tag}</span>
+          ))}
+        </div>
+      </header>
+
+      <div class="tool-content">
+        <Content />
+      </div>
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    margin-bottom: var(--spacing-lg);
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: var(--color-primary);
+  }
+
+  .tool-page {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .tool-header {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .tool-meta {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .tool-icon {
+    font-size: 4rem;
+    line-height: 1;
+  }
+
+  h1 {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .tool-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .category-badge,
+  .status-badge,
+  .featured-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .category-badge {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .status-badge {
+    color: white;
+  }
+
+  .featured-badge {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .tool-description {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .tool-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .tag {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--color-border);
+  }
+
+  .tool-content {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--spacing-xl);
+  }
+
+  .tool-content :global(h2) {
+    color: var(--color-text);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.75rem;
+  }
+
+  .tool-content :global(h3) {
+    color: var(--color-text);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.25rem;
+  }
+
+  .tool-content :global(p) {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.7;
+  }
+
+  .tool-content :global(ul),
+  .tool-content :global(ol) {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+    padding-left: var(--spacing-lg);
+  }
+
+  .tool-content :global(li) {
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .tool-content :global(code) {
+    background: var(--color-bg-secondary);
+    color: var(--color-primary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+  }
+
+  .tool-content :global(pre) {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--spacing-md);
+    overflow-x: auto;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .tool-content :global(a) {
+    color: var(--color-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-primary);
+    transition: opacity 0.2s;
+  }
+
+  .tool-content :global(a:hover) {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .tool-icon {
+      font-size: 3rem;
+    }
+
+    .tool-content {
+      padding: var(--spacing-md);
+    }
+  }
+</style>

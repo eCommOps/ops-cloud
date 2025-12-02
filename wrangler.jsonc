@@ -3,6 +3,12 @@
   "compatibility_date": "2025-12-02",
   "compatibility_flags": ["nodejs_compat"],
   "main": "dist/_worker.js",
+  "routes": [
+    {
+      "pattern": "*.opscloud.us/*",
+      "zone_name": "opscloud.us"
+    }
+  ],
   "observability": {
     "enabled": false,
     "head_sampling_rate": 1,

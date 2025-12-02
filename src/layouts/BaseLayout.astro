@@ -5,6 +5,8 @@ interface Props {
 }
 
 const { title, description = "Discover powerful AI tools and automation solutions" } = Astro.props;
+const auth = Astro.locals.auth;
+const user = auth?.user;
 ---
 
 <!DOCTYPE html>
@@ -21,11 +23,33 @@ const { title, description = "Discover powerful AI tools and automation solution
   <body>
     <header>
       <nav>
-        <div class="container">
+        <div class="container nav-container">
           <a href="/" class="logo">
             <span class="logo-icon">🚀</span>
             <span class="logo-text">AI Tools Directory</span>
           </a>
+
+          {user && (
+            <div class="user-menu">
+              <div class="user-info">
+                <span class="user-email">{user.email}</span>
+                <span class={`role-badge role-${user.role}`}>
+                  {user.role === 'super_user' ? 'Super User' : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </span>
+              </div>
+              {auth.hasRole(['admin', 'super_user']) && (
+                <a href="/admin" class="nav-link">Admin</a>
+              )}
+              <button id="logout-btn" class="logout-btn">Logout</button>
+            </div>
+          )}
+
+          {!user && (
+            <div class="auth-links">
+              <a href="/login" class="nav-link">Login</a>
+              <a href="/register" class="nav-link-primary">Sign Up</a>
+            </div>
+          )}
         </div>
       </nav>
     </header>
@@ -117,6 +141,102 @@ const { title, description = "Discover powerful AI tools and automation solution
     font-size: 1.75rem;
   }
 
+  .nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .user-email {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .role-viewer {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+  }
+
+  .role-admin {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+  }
+
+  .role-super_user {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+  }
+
+  .nav-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover {
+    color: var(--color-text);
+  }
+
+  .nav-link-primary {
+    color: white;
+    background: var(--color-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .nav-link-primary:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+  }
+
+  .auth-links {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .logout-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .logout-btn:hover {
+    background: var(--color-bg-card);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
   main {
     flex: 1;
     padding: var(--spacing-xl) 0;
@@ -155,5 +275,35 @@ const { title, description = "Discover powerful AI tools and automation solution
     h2 {
       font-size: 1.5rem;
     }
+
+    .nav-container {
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .user-menu {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
   }
 </style>
+
+<script>
+  const logoutBtn = document.getElementById('logout-btn');
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+        });
+
+        if (response.ok) {
+          window.location.href = '/login';
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    });
+  }
+</script>

@@ -1,4 +1,7 @@
 {
+  "name": "ops-cloud",
+  "compatibility_date": "2025-12-02",
+  "main": "dist/_worker.js",
   "observability": {
     "enabled": false,
     "head_sampling_rate": 1,
